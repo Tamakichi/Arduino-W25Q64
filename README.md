@@ -23,6 +23,9 @@ Arduinoでwinbond社製 SPI接続フラッシュメモリ**W25Q64**を利用す�
 ![回路図](img/Schematic1.png)
 ![接続図](img/Schematic2.png)
 
+3.3V稼働可能なArduinoは直接接続で利用します。  
+![接続図2](img/Schematic3.jpg)  
+
 ##サンプルプログラム
 スケッチ名：**sample.ino**  
 **W25Q64**に対して、書き込みと読み込みを行いその結果を表示します。  
