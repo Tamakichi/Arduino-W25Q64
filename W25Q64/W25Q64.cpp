@@ -2,6 +2,7 @@
 // フラッシュメモリW25Q64 からのフォントデータ取得
 // 作成 2014/10/14
 // 修正 2016/05/21
+// 修正 2017/11/18,Arduin STM32対応
 //
 
 #include <arduino.h>
@@ -54,7 +55,11 @@ void W25Q64_begin(uint8_t cs) {
     pinMode (cspin, OUTPUT);
     SPI.begin();
     SPI.setBitOrder(MSBFIRST);
+#if defined (__STM32F1__)
+    SPI.setClockDivider(SPI_CLOCK_DIV8); // 2014.10.1 DIV2 からDIV4に変更
+#else
     SPI.setClockDivider(SPI_CLOCK_DIV4); // 2014.10.1 DIV2 からDIV4に変更
+#endif
     SPI.setDataMode(SPI_MODE0);
     W25Q64_deselect();
 }

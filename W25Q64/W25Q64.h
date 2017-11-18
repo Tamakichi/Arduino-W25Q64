@@ -2,12 +2,13 @@
 // フラッシュメモリW25Q64 からのフォントデータ取得
 // 作成 2014/10/14
 // 修正 2016/05/21
+// 修正 2017/11/18,Arduin STM32対応
 //
 
 #include <arduino.h>
 #include <SPI.h>
 
-void W25Q64_begin(uint8_t cs=10); 		// フラッシュメモリ W25Q64の利用開始
+void W25Q64_begin(uint8_t cs); 		// フラッシュメモリ W25Q64の利用開始
 void W25Q64_end();						// フラッシュメモリ W25Q64の利用終了
 void W25Q64_select();					// チップセレクト フラッシュメモリ操作を選択にする
 void W25Q64_deselect(); 				// チップディセレクト フラッシュメモリ操作を有非選択にする
