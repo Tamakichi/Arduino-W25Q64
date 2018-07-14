@@ -5,7 +5,11 @@
 // 修正 2017/11/18,Arduin STM32対応
 // 修正 2018/07/14,Arduin STM32対応用W25Q64_seSPIPort()の追加
 // 修正 2018/07/14,W25Q64_begin()の第2引数にSPIのCLK周波数を指定可能にした
+// 修正 2018/07/14,ヘッダファイルの多重割り込み対応
 //
+
+#ifndef ___W25Q64_h___
+#define ___W25Q64_h___
 
 #include <arduino.h>
 #include <SPI.h>
@@ -32,3 +36,5 @@ boolean  W25Q64_erase64Block(uint16_t blk_no, boolean flgwait);		// 64KBブロ�
 boolean  W25Q64_erase32Block(uint16_t blk_no, boolean flgwait);		// 32KBブロック単位消去
 boolean  W25Q64_eraseAll(boolean flgwait);							// 全領域の消去
 uint16_t W25Q64_pageWrite(uint16_t sect_no, uint16_t inaddr, byte* data, byte n); // データの書き込み
+
+#endif
