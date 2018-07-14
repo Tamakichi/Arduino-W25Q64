@@ -3,6 +3,8 @@
 // 作成 2014/10/14
 // 修正 2016/05/21
 // 修正 2017/11/18,Arduin STM32対応
+// 修正 2018/07/14,Arduin STM32対応用W25Q64_seSPIPort()の追加
+// 修正 2018/07/14,W25Q64_begin()の第2引数にSPIのCLK周波数を指定可能にした
 //
 
 #include <arduino.h>
@@ -46,22 +48,23 @@
 #define SR1_WEN_MASK	0x02
 
 static uint8_t cspin ;
+static SPIClass* mpSPI = &SPI;
+static SPISettings mSPISettings;
+
+// SPIポートの設定
+void W25Q64_seSPIPort(SPIClass& rSPI) {
+  mpSPI = &rSPI;
+}
 
 //
 // フラッシュメモリ W25Q64の利用開始
 // 
-void W25Q64_begin(uint8_t cs) {
-	cspin = cs;
-    pinMode (cspin, OUTPUT);
-    SPI.begin();
-    SPI.setBitOrder(MSBFIRST);
-#if defined (__STM32F1__)
-    SPI.setClockDivider(SPI_CLOCK_DIV8); // 2014.10.1 DIV2 からDIV4に変更
-#else
-    SPI.setClockDivider(SPI_CLOCK_DIV4); // 2014.10.1 DIV2 からDIV4に変更
-#endif
-    SPI.setDataMode(SPI_MODE0);
-    W25Q64_deselect();
+void W25Q64_begin(uint8_t cs, uint32_t frq) {
+  cspin = cs;
+  pinMode (cspin, OUTPUT); 
+  W25Q64_deselect(); 
+  mSPISettings = SPISettings(frq, MSBFIRST, SPI_MODE0);
+  mpSPI->begin();
 }
 
 //
@@ -69,7 +72,8 @@ void W25Q64_begin(uint8_t cs) {
 // 
 void W25Q64_end() {
   W25Q64_powerDown();
-   SPI.end();
+  W25Q64_deselect();
+  mpSPI->end();
 }
 
 //
@@ -77,7 +81,8 @@ void W25Q64_end() {
 // フラッシュメモリ操作を選択にする
 //
 void W25Q64_select() {
-   digitalWrite(cspin, LOW); 
+  mpSPI->beginTransaction(mSPISettings);
+  digitalWrite(cspin, LOW); 
 }
 
 //
@@ -86,6 +91,7 @@ void W25Q64_select() {
 //
 void W25Q64_deselect() {
    digitalWrite(cspin, HIGH); 
+   mpSPI->endTransaction();
 }
 
 //
@@ -95,8 +101,8 @@ void W25Q64_deselect() {
 byte W25Q64_readStatusReg1() {
   byte rc;
   W25Q64_select();
-  SPI.transfer(CMD_READ_STATUS_R1);
-  rc = SPI.transfer(0xFF);
+  mpSPI->transfer(CMD_READ_STATUS_R1);
+  rc = mpSPI->transfer(0xFF);
   W25Q64_deselect();
   return rc;
 }
@@ -108,8 +114,8 @@ byte W25Q64_readStatusReg1() {
 byte W25Q64_readStatusReg2() {
   byte rc;
   W25Q64_select();
-  SPI.transfer(CMD_READ_STATUS_R2);
-  rc = SPI.transfer(0xFF);
+  mpSPI->transfer(CMD_READ_STATUS_R2);
+  rc = mpSPI->transfer(0xFF);
   W25Q64_deselect();
   return rc;
 }
@@ -120,9 +126,9 @@ byte W25Q64_readStatusReg2() {
 //
 void W25Q64_readManufacturer(byte* d) {
   W25Q64_select();
-  SPI.transfer(CMD_JEDEC_ID);
+  mpSPI->transfer(CMD_JEDEC_ID);
   for (byte i =0; i <3; i++) {
-    d[i] = SPI.transfer(0x00);
+    d[i] = mpSPI->transfer(0x00);
   } 
   W25Q64_deselect();
 }
@@ -133,13 +139,13 @@ void W25Q64_readManufacturer(byte* d) {
 //
 void W25Q64_readUniqieID(byte* d) {
   W25Q64_select();
-  SPI.transfer(CMD_READ_UNIQUE_ID);
-  SPI.transfer(0x00);
-  SPI.transfer(0x00);
-  SPI.transfer(0x00);
-  SPI.transfer(0x00);
+  mpSPI->transfer(CMD_READ_UNIQUE_ID);
+  mpSPI->transfer(0x00);
+  mpSPI->transfer(0x00);
+  mpSPI->transfer(0x00);
+  mpSPI->transfer(0x00);
   for (byte i =0; i <7; i++) {
-    d[i] = SPI.transfer(0x00);
+    d[i] = mpSPI->transfer(0x00);
   }
  W25Q64_deselect(); 
 }
@@ -151,8 +157,8 @@ void W25Q64_readUniqieID(byte* d) {
 boolean W25Q64_IsBusy() {
   uint8_t r1;
   W25Q64_select();
-  SPI.transfer(CMD_READ_STATUS_R1);
-  r1 = SPI.transfer(0xff);
+  mpSPI->transfer(CMD_READ_STATUS_R1);
+  r1 = mpSPI->transfer(0xff);
   W25Q64_deselect();
   if(r1 & SR1_BUSY_MASK)
     return true;
@@ -164,7 +170,7 @@ boolean W25Q64_IsBusy() {
 //
 void W25Q64_powerDown() {
   W25Q64_select();
-  SPI.transfer(CMD_POWER_DOWN);
+  mpSPI->transfer(CMD_POWER_DOWN);
   W25Q64_deselect();
 }
 
@@ -173,7 +179,7 @@ void W25Q64_powerDown() {
 //
 void W25Q64_WriteEnable() {
   W25Q64_select();
-  SPI.transfer(CMD_WRIRE_ENABLE);
+  mpSPI->transfer(CMD_WRIRE_ENABLE);
   W25Q64_deselect();
 }
 
@@ -182,7 +188,7 @@ void W25Q64_WriteEnable() {
 //
 void W25Q64_WriteDisable() {
   W25Q64_select();
-  SPI.transfer(CMD_WRITE_DISABLE);
+  mpSPI->transfer(CMD_WRITE_DISABLE);
   W25Q64_deselect();
 }
 
@@ -193,14 +199,14 @@ void W25Q64_WriteDisable() {
 //
 uint16_t W25Q64_read(uint32_t addr,uint8_t *buf,uint16_t n){ 
   W25Q64_select();
-  SPI.transfer(CMD_READ_DATA);
-  SPI.transfer(addr>>16);          // A23-A16
-  SPI.transfer((addr>>8) & 0xFF);  // A15-A08
-  SPI.transfer(addr & 0xFF);       // A07-A00
+  mpSPI->transfer(CMD_READ_DATA);
+  mpSPI->transfer(addr>>16);          // A23-A16
+  mpSPI->transfer((addr>>8) & 0xFF);  // A15-A08
+  mpSPI->transfer(addr & 0xFF);       // A07-A00
  
   uint16_t i;
   for(i = 0; i<n; i++ ) {
-    buf[i] = SPI.transfer(0x00);
+    buf[i] = mpSPI->transfer(0x00);
   }
   
   W25Q64_deselect();
@@ -214,15 +220,15 @@ uint16_t W25Q64_read(uint32_t addr,uint8_t *buf,uint16_t n){
 //
 uint16_t W25Q64_fastread(uint32_t addr,uint8_t *buf,uint16_t n) {
   W25Q64_select();
-  SPI.transfer(CMD_FAST_READ);
-  SPI.transfer(addr>>16);          // A23-A16
-  SPI.transfer((addr>>8) & 0xFF);  // A15-A08
-  SPI.transfer(addr & 0xFF);       // A07-A00
-  SPI.transfer(0x00);              // ダミー
+  mpSPI->transfer(CMD_FAST_READ);
+  mpSPI->transfer(addr>>16);          // A23-A16
+  mpSPI->transfer((addr>>8) & 0xFF);  // A15-A08
+  mpSPI->transfer(addr & 0xFF);       // A07-A00
+  mpSPI->transfer(0x00);              // ダミー
   
   uint16_t i;
   for(i = 0; i<n; i++)
-    buf[i] = SPI.transfer(0x00);
+    buf[i] = mpSPI->transfer(0x00);
   
   W25Q64_deselect();  
   return i;
@@ -237,23 +243,23 @@ uint16_t W25Q64_fastread(uint32_t addr,uint8_t *buf,uint16_t n) {
 //         アドレス23ビットのうち上位 11ビットがセクタ番号の相当する。下位12ビットはセクタ内アドレスとなる。
 //
 boolean W25Q64_eraseSector(uint16_t sect_no, boolean flgwait) {
- uint32_t addr = sect_no;
- addr<<=12;
+  uint32_t addr = sect_no;
+  addr<<=12;
 
- W25Q64_WriteEnable();
- W25Q64_select(); 
- SPI.transfer(CMD_SECTOR_ERASE);
- SPI.transfer((addr>>16) & 0xff);
- SPI.transfer((addr>>8) & 0xff);
- SPI.transfer(addr & 0xff);
- W25Q64_deselect();
- 
- // 処理待ち
- while(W25Q64_IsBusy() & flgwait) {
+  W25Q64_WriteEnable();
+  W25Q64_select(); 
+  mpSPI->transfer(CMD_SECTOR_ERASE);
+  mpSPI->transfer((addr>>16) & 0xff);
+  mpSPI->transfer((addr>>8) & 0xff);
+  mpSPI->transfer(addr & 0xff);
+  W25Q64_deselect();
+
+  // 処理待ち
+  while(W25Q64_IsBusy() & flgwait) {
     delay(10);
- }
- 
- return true;
+  }
+
+  return true;
 }
 
 //
@@ -265,23 +271,23 @@ boolean W25Q64_eraseSector(uint16_t sect_no, boolean flgwait) {
 //         アドレス23ビットのうち上位 7ビットがブロックの相当する。下位16ビットはブロック内アドレスとなる。
 //
 boolean W25Q64_erase64Block(uint16_t blk_no, boolean flgwait) {
- uint32_t addr = blk_no;
- addr<<=16;
+  uint32_t addr = blk_no;
+  addr<<=16;
 
- W25Q64_WriteEnable();
- W25Q64_select(); 
- SPI.transfer(CMD_BLOCK_ERASE64KB);
- SPI.transfer((addr>>16) & 0xff);
- SPI.transfer((addr>>8) & 0xff);
- SPI.transfer(addr & 0xff);
- W25Q64_deselect();
- 
- // 処理待ち
- while(W25Q64_IsBusy() & flgwait) {
+  W25Q64_WriteEnable();
+  W25Q64_select(); 
+  mpSPI->transfer(CMD_BLOCK_ERASE64KB);
+  mpSPI->transfer((addr>>16) & 0xff);
+  mpSPI->transfer((addr>>8) & 0xff);
+  mpSPI->transfer(addr & 0xff);
+  W25Q64_deselect();
+
+  // 処理待ち
+  while(W25Q64_IsBusy() & flgwait) {
     delay(50);
- }
- 
- return true;
+  }
+
+  return true;
 }
 
 //
@@ -294,19 +300,19 @@ boolean W25Q64_erase64Block(uint16_t blk_no, boolean flgwait) {
 //
 boolean W25Q64_erase32Block(uint16_t blk_no, boolean flgwait) {
 
- uint32_t addr = blk_no;
- addr<<=15;
+  uint32_t addr = blk_no;
+  addr<<=15;
 
- W25Q64_WriteEnable();  
- W25Q64_select(); 
- SPI.transfer(CMD_BLOCK_ERASE32KB);
- SPI.transfer((addr>>16) & 0xff);
- SPI.transfer((addr>>8) & 0xff);
- SPI.transfer(addr & 0xff);
- W25Q64_deselect();
- 
- // 処理待ち
- while(W25Q64_IsBusy() & flgwait) {
+  W25Q64_WriteEnable();  
+  W25Q64_select(); 
+  mpSPI->transfer(CMD_BLOCK_ERASE32KB);
+  mpSPI->transfer((addr>>16) & 0xff);
+  mpSPI->transfer((addr>>8) & 0xff);
+  mpSPI->transfer(addr & 0xff);
+  W25Q64_deselect();
+
+  // 処理待ち
+  while(W25Q64_IsBusy() & flgwait) {
     delay(50);
  }
  
@@ -322,7 +328,7 @@ boolean W25Q64_erase32Block(uint16_t blk_no, boolean flgwait) {
 boolean W25Q64_eraseAll(boolean flgwait) {
  W25Q64_WriteEnable();  
  W25Q64_select(); 
- SPI.transfer(CMD_CHIP_ERASE);
+ mpSPI->transfer(CMD_CHIP_ERASE);
  W25Q64_deselect();
 
  // 処理待ち
@@ -355,13 +361,13 @@ uint16_t W25Q64_pageWrite(uint16_t sect_no, uint16_t inaddr, byte* data, byte n)
   }
 
   W25Q64_select();
-  SPI.transfer(CMD_PAGE_PROGRAM);
-  SPI.transfer((addr>>16) & 0xff);
-  SPI.transfer((addr>>8) & 0xff);
-  SPI.transfer(addr & 0xff);
+  mpSPI->transfer(CMD_PAGE_PROGRAM);
+  mpSPI->transfer((addr>>16) & 0xff);
+  mpSPI->transfer((addr>>8) & 0xff);
+  mpSPI->transfer(addr & 0xff);
 
   for (i=0; i < n; i++) {
-    SPI.transfer(data[i]);
+    mpSPI->transfer(data[i]);
   }  
   W25Q64_deselect();
   while(W25Q64_IsBusy()) ;

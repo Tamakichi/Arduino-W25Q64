@@ -3,12 +3,16 @@
 // 作成 2014/10/14
 // 修正 2016/05/21
 // 修正 2017/11/18,Arduin STM32対応
+// 修正 2018/07/14,Arduin STM32対応用W25Q64_seSPIPort()の追加
+// 修正 2018/07/14,W25Q64_begin()の第2引数にSPIのCLK周波数を指定可能にした
 //
 
 #include <arduino.h>
 #include <SPI.h>
 
-void W25Q64_begin(uint8_t cs); 		// フラッシュメモリ W25Q64の利用開始
+void W25Q64_seSPIPort(SPIClass& rSPI); // SPIポートの設定
+
+void W25Q64_begin(uint8_t cs,uint32_t frq=8000000); 		// フラッシュメモリ W25Q64の利用開始
 void W25Q64_end();						// フラッシュメモリ W25Q64の利用終了
 void W25Q64_select();					// チップセレクト フラッシュメモリ操作を選択にする
 void W25Q64_deselect(); 				// チップディセレクト フラッシュメモリ操作を有非選択にする
