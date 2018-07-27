@@ -29,7 +29,7 @@ Arduinoでwinbond社製 SPI接続フラッシュメモリ**W25Q64**を利用す�
 
 
 Arduino STM32 Blue Pillボードでの利用例  
-利用するポートは、関数`void W25Q64_seSPIPort(SPIClass& rSPI);`で指定出来ます。  
+利用するポートは、関数`void W25Q64_setSPIPort(SPIClass& rSPI);`で指定出来ます。  
 ![接続図2](img/Schematic4.png)   
 
 

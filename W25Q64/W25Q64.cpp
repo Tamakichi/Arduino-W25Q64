@@ -5,10 +5,9 @@
 // 修正 2017/11/18,Arduin STM32対応
 // 修正 2018/07/14,Arduin STM32対応用W25Q64_seSPIPort()の追加
 // 修正 2018/07/14,W25Q64_begin()の第2引数にSPIのCLK周波数を指定可能にした
+// 修正 2018/07/27,W25Q64_seSPIPortをW25Q64_setSPIPortに訂正
 //
 
-#include <arduino.h>
-#include <SPI.h>
 #include <W25Q64.h>
 
 #define SPI_SLAVE_SEL_PIN    10     // チップセレクトピン番号
@@ -52,7 +51,7 @@ static SPIClass* mpSPI = &SPI;
 static SPISettings mSPISettings;
 
 // SPIポートの設定
-void W25Q64_seSPIPort(SPIClass& rSPI) {
+void W25Q64_setSPIPort(SPIClass& rSPI) {
   mpSPI = &rSPI;
 }
 

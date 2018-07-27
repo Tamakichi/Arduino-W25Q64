@@ -16,7 +16,6 @@
 // n(in)  : 表示データ数
 //
 void dump(byte *dt, uint32_t n) {
-  uint32_t sz;
   char buf[64];
   uint16_t clm = 0;
   byte data;
@@ -25,7 +24,6 @@ void dump(byte *dt, uint32_t n) {
   byte total =0;
   uint32_t saddr =0;
   uint32_t eaddr =n-1;
-  sz = eaddr -saddr;
   
   Serial.println("----------------------------------------------------------");
   for (uint16_t i=0;i<16;i++) vsum[i]=0;  

@@ -6,15 +6,16 @@
 // 修正 2018/07/14,Arduin STM32対応用W25Q64_seSPIPort()の追加
 // 修正 2018/07/14,W25Q64_begin()の第2引数にSPIのCLK周波数を指定可能にした
 // 修正 2018/07/14,ヘッダファイルの多重割り込み対応
+// 修正 2018/07/27,"arduino.h"を"Arduino.h"に訂正、W25Q64_seSPIPortをW25Q64_setSPIPortに訂正
 //
 
 #ifndef ___W25Q64_h___
 #define ___W25Q64_h___
 
-#include <arduino.h>
+#include <Arduino.h>
 #include <SPI.h>
 
-void W25Q64_seSPIPort(SPIClass& rSPI); // SPIポートの設定
+void W25Q64_setSPIPort(SPIClass& rSPI); // SPIポートの設定
 
 void W25Q64_begin(uint8_t cs,uint32_t frq=8000000); 		// フラッシュメモリ W25Q64の利用開始
 void W25Q64_end();						// フラッシュメモリ W25Q64の利用終了

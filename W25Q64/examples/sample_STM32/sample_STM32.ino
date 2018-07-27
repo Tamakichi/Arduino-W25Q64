@@ -27,7 +27,6 @@
 // n(in)  : 表示データ数
 //
 void dump(byte *dt, uint32_t n) {
-  uint32_t sz;
   char buf[64];
   uint16_t clm = 0;
   byte data;
@@ -36,7 +35,6 @@ void dump(byte *dt, uint32_t n) {
   byte total =0;
   uint32_t saddr =0;
   uint32_t eaddr =n-1;
-  sz = eaddr -saddr;
   
   Serial.println("----------------------------------------------------------");
   for (uint16_t i=0;i<16;i++) vsum[i]=0;  
@@ -82,7 +80,7 @@ void setup() {
     delay(1000);
 
 #if E25Q64_SPI_PORT !=1
-    W25Q64_seSPIPort(MySPI);
+    W25Q64_setSPIPort(MySPI);
     W25Q64_begin(E25Q64_CS,18000000);  // フラッシュメモリ利用開始
 #else
     W25Q64_begin(E25Q64_CS,32000000);  // フラッシュメモリ利用開始
