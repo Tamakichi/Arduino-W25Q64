@@ -6,6 +6,7 @@
 // 修正 2018/07/14,Arduin STM32対応用W25Q64_seSPIPort()の追加
 // 修正 2018/07/14,W25Q64_begin()の第2引数にSPIのCLK周波数を指定可能にした
 // 修正 2018/07/27,W25Q64_seSPIPortをW25Q64_setSPIPortに訂正
+// 修正 2019/06/23,W25Q64_pageWrite()の書き込みバイト数の型をbyteからuint16_tに変更
 //
 
 #include <W25Q64.h>
@@ -346,10 +347,10 @@ boolean W25Q64_eraseAll(boolean flgwait) {
 // data(in)    : 書込みデータ格納アドレス
 // n(in)       : 書込みバイト数(0～256)
 //
-uint16_t W25Q64_pageWrite(uint16_t sect_no, uint16_t inaddr, byte* data, byte n) {
+uint16_t W25Q64_pageWrite(uint16_t sect_no, uint16_t inaddr, byte* data, uint16_t n) {
 
   uint32_t addr = sect_no;
-  int i;
+  uint16_t i;
   addr<<=12;
   addr += inaddr;
 

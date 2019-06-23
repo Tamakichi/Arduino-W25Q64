@@ -7,6 +7,7 @@
 // 修正 2018/07/14,W25Q64_begin()の第2引数にSPIのCLK周波数を指定可能にした
 // 修正 2018/07/14,ヘッダファイルの多重割り込み対応
 // 修正 2018/07/27,"arduino.h"を"Arduino.h"に訂正、W25Q64_seSPIPortをW25Q64_setSPIPortに訂正
+// 修正 2019/06/23,W25Q64_pageWrite()の書き込みバイト数の型をbyteからuint16_tに変更
 //
 
 #ifndef ___W25Q64_h___
@@ -36,6 +37,6 @@ boolean  W25Q64_eraseSector(uint16_t sect_no, boolean flgwait);		// セクタ単
 boolean  W25Q64_erase64Block(uint16_t blk_no, boolean flgwait);		// 64KBブロック単位消去
 boolean  W25Q64_erase32Block(uint16_t blk_no, boolean flgwait);		// 32KBブロック単位消去
 boolean  W25Q64_eraseAll(boolean flgwait);							// 全領域の消去
-uint16_t W25Q64_pageWrite(uint16_t sect_no, uint16_t inaddr, byte* data, byte n); // データの書き込み
+uint16_t W25Q64_pageWrite(uint16_t sect_no, uint16_t inaddr, byte* data, uint16_t n); // データの書き込み
 
 #endif
