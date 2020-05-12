@@ -6,6 +6,9 @@
 //   ブロック数 128 (64KB/ブロック)
 //   セクタ数 2048  ( 4KB/セクタ)
 //   総セクタ数 2048
+//
+//  修正 2020/05/12, Unique ID取得の修正
+//
 
 #include <string.h>
 #include <W25Q64.h>
@@ -80,9 +83,10 @@ void setup() {
     Serial.println("");
     
     // Unique IDの取得テスト
+    memset(buf,0,8);
     W25Q64_readUniqieID(buf);
     Serial.print("Unique ID : ");
-    for (byte i=0; i< 7; i++) {
+    for (byte i=0; i< 8; i++) {
       Serial.print(buf[i],HEX);
       Serial.print(" ");
     }
@@ -137,5 +141,3 @@ void setup() {
 void loop() {
 
 }
-
-

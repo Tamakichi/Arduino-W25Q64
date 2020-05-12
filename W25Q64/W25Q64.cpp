@@ -7,6 +7,7 @@
 // 修正 2018/07/14,W25Q64_begin()の第2引数にSPIのCLK周波数を指定可能にした
 // 修正 2018/07/27,W25Q64_seSPIPortをW25Q64_setSPIPortに訂正
 // 修正 2019/06/23,W25Q64_pageWrite()の書き込みバイト数の型をbyteからuint16_tに変更
+// 修正 2020/05/212,W25Q64_readUniqieID()の読み取りバイト数不具合修正（7=>8バイト)
 //
 
 #include <W25Q64.h>
@@ -144,7 +145,7 @@ void W25Q64_readUniqieID(byte* d) {
   mpSPI->transfer(0x00);
   mpSPI->transfer(0x00);
   mpSPI->transfer(0x00);
-  for (byte i =0; i <7; i++) {
+  for (byte i =0; i <8; i++) {
     d[i] = mpSPI->transfer(0x00);
   }
  W25Q64_deselect(); 
