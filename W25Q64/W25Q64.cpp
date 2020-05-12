@@ -136,7 +136,7 @@ void W25Q64_readManufacturer(byte* d) {
 
 //
 // Unique IDの取得
-// d(out): Unique ID 7バイトを返す  
+// d(out): Unique ID 8バイトを返す  
 //
 void W25Q64_readUniqieID(byte* d) {
   W25Q64_select();
